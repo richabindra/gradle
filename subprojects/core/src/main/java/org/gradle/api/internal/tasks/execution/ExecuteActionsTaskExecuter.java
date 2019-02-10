@@ -257,8 +257,8 @@ public class ExecuteActionsTaskExecuter implements TaskExecuter {
                         LOGGER.info("Custom actions are attached to {}.", task);
                     }
                     if (context.isTaskCachingEnabled()
-                            && context.getTaskExecutionMode().isAllowedToUseCachedResults()
-                            && context.getBuildCacheKey().isValid()
+                        && context.getTaskExecutionMode().isAllowedToUseCachedResults()
+                        && context.getBuildCacheKey().isValid()
                     ) {
                         return loader.apply(context.getBuildCacheKey());
                     } else {
@@ -269,8 +269,8 @@ public class ExecuteActionsTaskExecuter implements TaskExecuter {
                 @Override
                 public void store(Consumer<BuildCacheKey> storer) {
                     if (buildCacheEnabled
-                            && context.isTaskCachingEnabled()
-                            && context.getBuildCacheKey().isValid()
+                        && context.isTaskCachingEnabled()
+                        && context.getBuildCacheKey().isValid()
                     ) {
                         storer.accept(context.getBuildCacheKey());
                     }
@@ -406,4 +406,5 @@ public class ExecuteActionsTaskExecuter implements TaskExecuter {
             super(message, causes);
         }
     }
+
 }
