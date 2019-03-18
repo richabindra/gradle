@@ -44,6 +44,9 @@ class PerformanceTest(model: CIBuildModel, type: PerformanceTestType, stage: Sta
 
     gradleRunnerStep(model, tasks, extraParameters = runnerParameters)
     checkCleanM2Step(Os.linux)
-    gradleRerunnerStep(model, tasks, extraParameters = runnerParameters)
+
+    if (type.hasRerunner) {
+        gradleRerunnerStep(model, tasks, extraParameters = runnerParameters)
+    }
     applyDefaultDependencies(model, this, true)
 })
