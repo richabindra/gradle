@@ -110,7 +110,6 @@ fun ProjectFeatures.buildReportTab(title: String, startPage: String) {
     }
 }
 
-private
 fun BaseGradleBuildType.checkCleanM2Step(os: Os = Os.linux) {
     steps {
         script {
@@ -132,21 +131,6 @@ fun BaseGradleBuildType.verifyTestFilesCleanupStep(daemon: Boolean = true) {
     }
 }
 
-private
-fun BaseGradleBuildType.tagBuildStep(model: CIBuildModel, daemon: Boolean = true) {
-    steps {
-        if (model.tagBuilds) {
-            gradleWrapper {
-                name = "TAG_BUILD"
-                executionMode = BuildStep.ExecutionMode.ALWAYS
-                tasks = "tagBuild"
-                gradleParams = "${gradleParameterString(daemon)} -PteamCityUsername=%teamcity.username.restbot% -PteamCityPassword=%teamcity.password.restbot% -PteamCityBuildId=%teamcity.build.id% -PgithubToken=%github.ci.oauth.token%"
-            }
-        }
-    }
-}
-
-private
 fun BaseGradleBuildType.gradleRunnerStep(model: CIBuildModel, gradleTasks: String, os: Os = Os.linux, extraParameters: String = "", daemon: Boolean = true) {
     val buildScanTags = model.buildScanTags + listOfNotNull(stage?.id)
 
@@ -167,14 +151,13 @@ fun BaseGradleBuildType.gradleRunnerStep(model: CIBuildModel, gradleTasks: Strin
     }
 }
 
-private
 fun BaseGradleBuildType.gradleRerunnerStep(model: CIBuildModel, gradleTasks: String, os: Os = Os.linux, extraParameters: String = "", daemon: Boolean = true) {
     val buildScanTags = model.buildScanTags + listOfNotNull(stage?.id)
 
     steps {
         gradleWrapper {
             name = "GRADLE_RERUNNER"
-            tasks = gradleTasks
+            tasks = "$gradleTasks tagBuild"
             executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
             gradleParams = (
                     listOf(gradleParameterString(daemon)) +
@@ -184,7 +167,8 @@ fun BaseGradleBuildType.gradleRerunnerStep(model: CIBuildModel, gradleTasks: Str
                             "-PteamCityPassword=%teamcity.password.restbot%" +
                             "-PteamCityBuildId=%teamcity.build.id%" +
                             buildScanTags.map { configurations.buildScanTag(it) } +
-                            "-PonlyPreviousFailedTestClasses=true"
+                            "-PonlyPreviousFailedTestClasses=true" +
+                            "-PteamCityBuildId=%teamcity.build.id%"
                     ).joinToString(separator = " ")
         }
     }
@@ -213,7 +197,6 @@ fun applyDefaults(model: CIBuildModel, buildType: BaseGradleBuildType, gradleTas
 
     buildType.checkCleanM2Step(os)
     buildType.verifyTestFilesCleanupStep(daemon)
-    buildType.tagBuildStep(model, daemon)
 
     applyDefaultDependencies(model, buildType, notQuick)
 }
@@ -230,7 +213,6 @@ fun applyTestDefaults(model: CIBuildModel, buildType: BaseGradleBuildType, gradl
 
     buildType.checkCleanM2Step(os)
     buildType.verifyTestFilesCleanupStep(daemon)
-    buildType.tagBuildStep(model, daemon)
 
     applyDefaultDependencies(model, buildType, notQuick)
 }
